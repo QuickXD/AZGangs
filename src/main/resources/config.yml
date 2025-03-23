@@ -1,6 +1,6 @@
 ################################### by Analisi #################################################
 database:
-  type: "sqlite" # mysql or sqlite
+  type: "sqlite" # mysql o sqlite
   host: "localhost"
   port: 3306
   database: "azgangs"
@@ -14,51 +14,49 @@ gang-settings:
   max-name-length: 16
   min-name-length: 3
 
-# Messages
+# Messaggi
 messages:
   prefix: "&8[&6AZGangs&8] "
-  gang-created: "&aYour gang &6%gangName% &ahas been created successfully!"
-  gang-disbanded: "&cGang &6%gangName% &chas been disbanded."
-  gang-renamed: "&aYour gang has been renamed to &6%newName%&a."
-  invite-sent: "&aYou have sent a gang invitation to &6%playerName%."
-  invite-received: "&aYou have been invited to join gang &6%gangName%. Use /gang join to accept."
-  invite-accepted: "&a%playerName% has joined your gang."
-  joined-gang: "&aYou joined &6%gangName%"
-  gang-left: "&aYou have left gang &6%gangName%. If you were the owner, the gang has been disbanded."
-  no-permission: "&cYou don't have permission to execute this command."
-  already-in-gang: "&cYou are already in a gang."
-  not-in-gang: "&cYou are not in a gang."
-  not-gang-owner: "&cOnly the gang owner can execute this command."
-  not-gang-member: "&cOnly gang members can execute this command."
-  gang-full: "&cThis gang has reached the maximum number of members."
-  player-not-found: "&cPlayer not found or offline."
-  player-already-in-gang: "&cThis player is already in a gang."
-  no-pending-invites: "&cYou don't have any pending gang invitations."
-  invite-expired: "&cThe invitation has expired."
-  gang-name-taken: "&cA gang with this name already exists."
-  gang-name-invalid: "&cInvalid gang name. Names must be %min%-%max% characters and contain only letters and numbers."
-  gang-info-header: "&6===== &eGang Information: &6%gangName% &6====="
-  gang-info-owner: "&eOwner: &f%owner%"
-  gang-info-members: "&eMembers: &f%members%"
+  gang-created: "&aLa tua gang &6%gangName% &è stata creata con successo!"
+  gang-disbanded: "&cLa gang &6%gangName% &è stata sciolta."
+  gang-renamed: "&aLa tua gang è stata rinominata in &6%newName%&a."
+  invite-sent: "&aHai inviato un invito alla gang a &6%playerName%."
+  invite-received: "&aSei stato invitato a unirti alla gang &6%gangName%. Usa /gang join per accettare."
+  invite-accepted: "&a%playerName% si è unito alla tua gang."
+  joined-gang: "&aTi sei unito alla gang &6%gangName%"
+  gang-left: "&aHai lasciato la gang &6%gangName%. Se eri il proprietario, la gang è stata sciolta."
+  no-permission: "&cNon hai il permesso per eseguire questo comando."
+  already-in-gang: "&cSei già in una gang."
+  not-in-gang: "&cNon sei in una gang."
+  not-gang-owner: "&cSolo il proprietario della gang può eseguire questo comando."
+  not-gang-member: "&cSolo i membri della gang possono eseguire questo comando."
+  gang-full: "&cQuesta gang ha raggiunto il numero massimo di membri."
+  player-not-found: "&cGiocatore non trovato o offline."
+  player-already-in-gang: "&cQuesto giocatore è già in una gang."
+  no-pending-invites: "&cNon hai inviti di gang in sospeso."
+  invite-expired: "&cL'invito è scaduto."
+  gang-name-taken: "&cEsiste già una gang con questo nome."
+  gang-name-invalid: "&cNome della gang non valido. I nomi devono essere lunghi tra %min% e %max% caratteri e contenere solo lettere e numeri."
+  gang-info-header: "&6===== &eInformazioni sulla Gang: &6%gangName% &6====="
+  gang-info-owner: "&eProprietario: &f%owner%"
+  gang-info-members: "&eMembri: &f%members%"
   gang-info-footer: "&6==========================================="
-  gang-list-header: "&6===== &eGang List &6====="
-  gang-list-entry: "&e%gangName% &7- &fOwner: %owner%, Members: %memberCount%"
+  gang-list-header: "&6===== &eLista delle Gangs &6====="
+  gang-list-entry: "&e%gangName% &7- &fProprietario: %owner%, Membri: %memberCount%"
   gang-list-footer: "&6==========================================="
-  help-header: "&6===== &eAZGangs Help &6===== by Analisi"
+  help-header: "&6===== &eGuida AZGangs &6===== by Analisi"
   help-footer: "&6==========================================="
 
-
 help:
-  create: "&e/gang create <name> &7- Create a new gang"
-  disband: "&e/gang disband &7- Disband your gang"
-  rename: "&e/gang rename <name> &7- Rename your gang"
-  invite: "&e/gang invite <player> &7- Invite a player to your gang"
-  join: "&e/gang join &7- Join a gang you've been invited to"
-  leave: "&e/gang leave &7- Leave your current gang"
-  info: "&e/gang info [gang] &7- Display information about a gang"
-  list: "&e/gang list &7- List all gangs"
-  help: "&e/gang help &7- Display this help message"
-
+  create: "&e/gang create <nome> &7- Crea una nuova gang"
+  disband: "&e/gang disband &7- Sciogli la tua gang"
+  rename: "&e/gang rename <nome> &7- Rinomina la tua gang"
+  invite: "&e/gang invite <giocatore> &7- Invita un giocatore nella tua gang"
+  join: "&e/gang join &7- Unisciti a una gang in cui sei stato invitato"
+  leave: "&e/gang leave &7- Lascia la tua attuale gang"
+  info: "&e/gang info [gang] &7- Visualizza le informazioni su una gang"
+  list: "&e/gang list &7- Elenco di tutte le gang"
+  help: "&e/gang help &7- Visualizza questo messaggio di aiuto"
 
 permissions:
   create: "azgangs.create"

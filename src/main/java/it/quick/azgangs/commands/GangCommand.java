@@ -29,7 +29,7 @@ public class GangCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("This command can only be used by players.");
+            sender.sendMessage("Questo comando lo possono usare solo i players, non la console.");
             return true;
         }
 
@@ -72,7 +72,7 @@ public class GangCommand implements CommandExecutor, TabCompleter {
                 break;
             case "off":
                 AZGangs.getInstance().disableGangMessage(player);
-                player.sendMessage("§e[AZGangs] § Ok. The message have been disabled.");
+                player.sendMessage("§e[AZGangs] § Ok. Messaggio disabilitato.");
                 break;
             default:
                 showHelp(player);

@@ -60,12 +60,12 @@ public class ConfigManager {
 
     public String getMessage(String path) {
         String prefix = config.getString("messages.prefix", "&8[&6AZGangs&8] ");
-        String message = config.getString("messages." + path, "&cMessage not found: " + path);
+        String message = config.getString("messages." + path, "&cErrore: " + path);
         return ChatColor.translateAlternateColorCodes('&', prefix + message);
     }
 
     public String getMessageNoPrefix(String path) {
-        String message = config.getString("messages." + path, "&cMessage not found: " + path);
+        String message = config.getString("messages." + path, "&cErrore: " + path);
         return ChatColor.translateAlternateColorCodes('&', message);
     }
 

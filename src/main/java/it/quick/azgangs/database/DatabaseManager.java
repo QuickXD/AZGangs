@@ -26,14 +26,14 @@ public class DatabaseManager {
             try {
                 Class.forName("org.sqlite.JDBC");
             } catch (ClassNotFoundException e) {
-                plugin.getLogger().severe("SQLite JDBC driver not found: " + e.getMessage());
-                throw new SQLException("SQLite driver not found", e);
+                plugin.getLogger().severe("SQLite JDBC driver non trovato: " + e.getMessage());
+                throw new SQLException("SQLite driver non trovato", e);
             }
 
             connectToDatabase();
             createTables();
         } catch (SQLException e) {
-            plugin.getLogger().severe("Failed to initialize database: " + e.getMessage());
+            plugin.getLogger().severe("Errore nell'inizializzazione del database: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -53,21 +53,21 @@ public class DatabaseManager {
             try {
                 Class.forName("com.mysql.jdbc.Driver");
             } catch (ClassNotFoundException e) {
-                plugin.getLogger().severe("MySQL JDBC driver not found: " + e.getMessage());
-                throw new SQLException("MySQL driver not found", e);
+                plugin.getLogger().severe("Driver JDBC MySQL non trovato: " + e.getMessage());
+                throw new SQLException("Driver MySQL non trovato", e);
             }
 
             connection = DriverManager.getConnection(url, username, password);
-            plugin.getLogger().info("Connected to MySQL database!");
+            plugin.getLogger().info("Connessione al database MySQL avvenuta con successo!");
         } else if (type.equalsIgnoreCase("sqlite")) {
             if (!plugin.getDataFolder().exists()) {
                 plugin.getDataFolder().mkdirs();
             }
             String url = "jdbc:sqlite:" + plugin.getDataFolder().getAbsolutePath() + "/azgangs.db";
             connection = DriverManager.getConnection(url);
-            plugin.getLogger().info("Connected to SQLite database!");
+            plugin.getLogger().info("Connessione al database SQLite avvenuta con successo!");
         } else {
-            plugin.getLogger().severe("Unknown database type: " + type + ". Using SQLite as fallback.");
+            plugin.getLogger().severe("Tipo di database sconosciuto: " + type + ". Utilizzo SQLite come fallback.");
             if (!plugin.getDataFolder().exists()) {
                 plugin.getDataFolder().mkdirs();
             }
@@ -78,7 +78,7 @@ public class DatabaseManager {
 
     private void createTables() throws SQLException {
         if (connection == null) {
-            plugin.getLogger().severe("Cannot create tables: database connection is null");
+            plugin.getLogger().severe("Errore nella creazioni delle tabelle");
             return;
         }
 
@@ -106,10 +106,10 @@ public class DatabaseManager {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
-                plugin.getLogger().info("Database connection closed.");
+                plugin.getLogger().info("Connessione al database chiusa.");
             }
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error closing database connection: " + e.getMessage());
+            plugin.getLogger().severe("Errore nella chiusura del database: " + e.getMessage());
         }
     }
 
@@ -137,7 +137,7 @@ public class DatabaseManager {
                 }
             }
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error creating gang: " + e.getMessage());
+            plugin.getLogger().severe("Errore nella creazione di una gang: " + e.getMessage());
         }
 
         return false;
@@ -152,7 +152,7 @@ public class DatabaseManager {
             int affectedRows = statement.executeUpdate();
             return affectedRows > 0;
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error disbanding gang: " + e.getMessage());
+            plugin.getLogger().severe("Errore nell'eliminazione di una gang: " + e.getMessage());
             return false;
         }
     }
@@ -167,14 +167,14 @@ public class DatabaseManager {
             int affectedRows = statement.executeUpdate();
             return affectedRows > 0;
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error renaming gang: " + e.getMessage());
+            plugin.getLogger().severe("Errore nella ridenominazione di una gang: " + e.getMessage());
             return false;
         }
     }
 
     public Gang getGangById(int gangId) {
         if (connection == null) {
-            plugin.getLogger().severe("Cannot get gang: database connection is null");
+            plugin.getLogger().severe("Errore nell'ottenimento della gang");
             return null;
         }
 
@@ -189,7 +189,7 @@ public class DatabaseManager {
                 }
             }
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error getting gang by ID: " + e.getMessage());
+            plugin.getLogger().severe("Errore trovato: non è possibile trovare la gang tramite id " + e.getMessage());
         }
 
         return null;
@@ -197,7 +197,7 @@ public class DatabaseManager {
 
     public Gang getGangByName(String name) {
         if (connection == null) {
-            plugin.getLogger().severe("Cannot get gang: database connection is null");
+            plugin.getLogger().severe("Impossibile recuperare i dati della gang.");
             return null;
         }
 
@@ -212,7 +212,7 @@ public class DatabaseManager {
                 }
             }
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error getting gang by name: " + e.getMessage());
+            plugin.getLogger().severe("Errore nell'ottenimento della gang: " + e.getMessage());
         }
 
         return null;
@@ -220,7 +220,7 @@ public class DatabaseManager {
 
     public Gang getGangByPlayerUUID(UUID playerUUID) {
         if (connection == null) {
-            plugin.getLogger().severe("Cannot get gang: database connection is null");
+            plugin.getLogger().severe("Errore nell'ottenimento della gang");
             return null;
         }
 
@@ -237,7 +237,7 @@ public class DatabaseManager {
                 }
             }
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error getting gang by player UUID: " + e.getMessage());
+            plugin.getLogger().severe("Impossibile trovare la gang tramite UUID: " + e.getMessage());
         }
 
         return null;
@@ -247,7 +247,7 @@ public class DatabaseManager {
         List<Gang> gangs = new ArrayList<>();
 
         if (connection == null) {
-            plugin.getLogger().severe("Cannot get gangs: database connection is null");
+            plugin.getLogger().severe("Errore nell'ottenere la gang.");
             return gangs;
         }
 
@@ -258,7 +258,7 @@ public class DatabaseManager {
                 gangs.add(extractGangFromResultSet(resultSet));
             }
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error getting all gangs: " + e.getMessage());
+            plugin.getLogger().severe("Errore nell'ottenere tutte le gang: " + e.getMessage());
         }
 
         return gangs;
@@ -279,7 +279,7 @@ public class DatabaseManager {
 
     public boolean addMember(int gangId, UUID playerUUID) {
         if (connection == null) {
-            plugin.getLogger().severe("Cannot add member: database connection is null");
+            plugin.getLogger().severe("Errore: database is null");
             return false;
         }
 
@@ -292,14 +292,14 @@ public class DatabaseManager {
             int affectedRows = statement.executeUpdate();
             return affectedRows > 0;
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error adding member to gang: " + e.getMessage());
+            plugin.getLogger().severe("Impossibile aggiungere membri alla gang: " + e.getMessage());
             return false;
         }
     }
 
     public boolean removeMember(UUID playerUUID) {
         if (connection == null) {
-            plugin.getLogger().severe("Cannot remove member: database connection is null");
+            plugin.getLogger().severe("Impossibile rimuovere utenti dalla gang: database null");
             return false;
         }
 
@@ -311,7 +311,7 @@ public class DatabaseManager {
             int affectedRows = statement.executeUpdate();
             return affectedRows > 0;
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error removing member from gang: " + e.getMessage());
+            plugin.getLogger().severe("Errore nella rimozione dei player dalla gang: " + e.getMessage());
             return false;
         }
     }
@@ -320,7 +320,7 @@ public class DatabaseManager {
         List<UUID> members = new ArrayList<>();
 
         if (connection == null) {
-            plugin.getLogger().severe("Cannot get members: database connection is null");
+            plugin.getLogger().severe("Errore nell'ottenere i players");
             return members;
         }
 
@@ -335,7 +335,7 @@ public class DatabaseManager {
                 }
             }
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error getting gang members: " + e.getMessage());
+            plugin.getLogger().severe("Errore nell'ottenere i players della gang: " + e.getMessage());
         }
 
         return members;
@@ -343,7 +343,7 @@ public class DatabaseManager {
 
     public int getGangMemberCount(int gangId) {
         if (connection == null) {
-            plugin.getLogger().severe("Cannot get member count: database connection is null");
+            plugin.getLogger().severe("Impossibile trovare il numero dei membri.");
             return 0;
         }
 
@@ -358,7 +358,7 @@ public class DatabaseManager {
                 }
             }
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error getting gang member count: " + e.getMessage());
+            plugin.getLogger().severe("Errore nel trovare il numero dei membri della gang: " + e.getMessage());
         }
 
         return 0;
@@ -366,7 +366,7 @@ public class DatabaseManager {
 
     public boolean isPlayerInGang(UUID playerUUID) {
         if (connection == null) {
-            plugin.getLogger().severe("Cannot check player membership: database connection is null");
+            plugin.getLogger().severe("Errore!");
             return false;
         }
 
@@ -381,7 +381,7 @@ public class DatabaseManager {
                 }
             }
         } catch (SQLException e) {
-            plugin.getLogger().severe("Error checking if player is in gang: " + e.getMessage());
+            plugin.getLogger().severe("Errore nel check se il player è in una gang: " + e.getMessage());
         }
 
         return false;

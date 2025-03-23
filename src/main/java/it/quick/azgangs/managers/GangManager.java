@@ -218,8 +218,8 @@ public class GangManager {
 
             boolean removed = plugin.getDatabaseManager().removeMember(playerUUID);
             if (!removed) {
-                plugin.getLogger().warning("Failed to remove player " + playerUUID + " from gang " +
-                        currentGang.getId() + " before adding to new gang");
+                plugin.getLogger().warning("Errore nella rimozione di " + playerUUID + " dalla gang " +
+                        currentGang.getId() + " prima di aggiungerlo ad una nuova gang");
                 return false;
             }
         }

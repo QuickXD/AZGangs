@@ -43,12 +43,12 @@ public class AZGangs extends JavaPlugin {
 
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new GangPlaceholder(this).register();
-            getLogger().info("Successfully hooked into PlaceholderAPI!");
+            getLogger().info("Correttamente hooked in PlaceholderAPI!");
         } else {
-            getLogger().warning("PlaceholderAPI not found! Placeholders will not work.");
+            getLogger().warning("PlaceholderAPI non trovato, i Placeholders non funzionerà.");
         }
 
-        getLogger().info("AZGangs has been enabled!");
+        getLogger().info("AZGangs abilitato!");
 
         startAnnouncementTask();
     }
@@ -66,8 +66,8 @@ public class AZGangs extends JavaPlugin {
         Bukkit.getScheduler().runTaskLater(this, () -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (!disabledMessages.contains(player)) {
-                    player.sendMessage("§e[AZGangs] §fTo add your gang name in the TAB, follow this guide: §bhttps://pastebin.com/tuTKHXUk");
-                    player.sendMessage("§7To disable this message, use §c/gang off");
+                    player.sendMessage("§e[AZGangs] §fPer aggiungere il nome della tua gang nel TAB, segui questa guida: §bhttps://pastebin.com/tuTKHXUk");
+                    player.sendMessage("§7Per disabilitare questo messaggio, usa §c/gang off");
                 }
             }
         }, 2400L);
