@@ -1,0 +1,4 @@
+name: AZGangs
+version: '${project.version}'
+main: it.quick.azgangs.AZGangs
+api-version: '1.13'
