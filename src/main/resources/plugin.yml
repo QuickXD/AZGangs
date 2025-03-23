@@ -1,4 +1,15 @@
 name: AZGangs
-version: '${project.version}'
+version: 1.0
 main: it.quick.azgangs.AZGangs
-api-version: '1.13'
+author: Analisi
+description: A comprehensive gang management plugin
+api-version: 1.8
+softdepend: [PlaceholderAPI]
+commands:
+  gang:
+    description: Main command for gang management
+    aliases: [gangs]
+permissions:
+  azgang.*:
+    description: Gives access to all AZGangs commands and features
+    default: op
