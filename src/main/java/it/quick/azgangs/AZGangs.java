@@ -62,15 +62,17 @@ public class AZGangs extends JavaPlugin {
     }
 
     private void startAnnouncementTask() {
-        Bukkit.getScheduler().runTaskTimer(this, () -> {
+
+        Bukkit.getScheduler().runTaskLater(this, () -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (!disabledMessages.contains(player)) {
                     player.sendMessage("§e[AZGangs] §fTo add your gang name in the TAB, follow this guide: §bhttps://pastebin.com/tuTKHXUk");
                     player.sendMessage("§7To disable this message, use §c/gang off");
                 }
             }
-        }, 3600L, 36000L);
+        }, 2400L);
     }
+
 
     public void disableGangMessage(Player player) {
         disabledMessages.add(player);
