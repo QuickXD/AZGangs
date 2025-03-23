@@ -2,14 +2,14 @@ name: AZGangs
 version: 1.0
 main: it.quick.azgangs.AZGangs
 author: Analisi
-description: A comprehensive gang management plugin
+description: 1.8 Gangs plugin by Analisi 
 api-version: 1.8
 softdepend: [PlaceholderAPI]
 commands:
   gang:
-    description: Main command for gang management
+    description: Comando principale, esegui /gang help.
     aliases: [gangs]
 permissions:
   azgang.*:
-    description: Gives access to all AZGangs commands and features
+    description: Dai l'accesso Full perms ai comandi del plugin.
     default: op
