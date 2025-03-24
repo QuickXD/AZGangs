@@ -25,7 +25,7 @@ public class DatabaseManager {
         this.tablePrefix = plugin.getConfigManager().getDatabasePrefix();
         this.gangsTable = tablePrefix + "gangs";
         this.membersTable = tablePrefix + "members";
-        this.executorService = Executors.newFixedThreadPool(4);
+        this.executorService = Executors.newFixedThreadPool(2);
     }
 
     public void initialize() {
@@ -52,7 +52,7 @@ public class DatabaseManager {
         config.setMinimumIdle(10);
         config.setIdleTimeout(30000);
         config.setMaxLifetime(45000);
-        config.setConnectionTimeout(10000);
+        config.setConnectionTimeout(5000);
         config.setPoolName("AZGangsConnectionPool");
 
         if (!type.equals("mysql")) {
