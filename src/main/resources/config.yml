@@ -1,12 +1,7 @@
 ################################### by Analisi #################################################
 database:
-  type: "sqlite" # mysql o sqlite
-  host: "localhost"
-  port: 3306
-  database: "azgangs"
-  username: "root"
-  password: "azplugins"
-  table-prefix: "azgangs_"
+  type: sqlite
+  prefix: azgangs_
 
 gang-settings:
   max-members-per-gang: 10
@@ -17,14 +12,14 @@ gang-settings:
 # Messaggi
 messages:
   prefix: "&8[&6AZGangs&8] "
-  gang-created: "&aLa tua gang &6%gangName% &è stata creata con successo!"
-  gang-disbanded: "&cLa gang &6%gangName% &è stata sciolta."
+  gang-created: "&aLa tua gang &6%gangName% &aè stata creata con successo!"
+  gang-disbanded: "&cLa gang &6%gangName% &cè stata sciolta."
   gang-renamed: "&aLa tua gang è stata rinominata in &6%newName%&a."
-  invite-sent: "&aHai inviato un invito alla gang a &6%playerName%."
-  invite-received: "&aSei stato invitato a unirti alla gang &6%gangName%. Usa /gang join per accettare."
+  invite-sent: "&aHai inviato un invito alla gang a &6%playerName%&a."
+  invite-received: "&aSei stato invitato a unirti alla gang &6%gangName%&a. Usa /gang join per accettare."
   invite-accepted: "&a%playerName% si è unito alla tua gang."
-  joined-gang: "&aTi sei unito alla gang &6%gangName%"
-  gang-left: "&aHai lasciato la gang &6%gangName%. Se eri il proprietario, la gang è stata sciolta."
+  joined-gang: "&aTi sei unito alla gang &6%gangName%&a."
+  gang-left: "&aHai lasciato la gang &6%gangName%&a. Se eri il proprietario, la gang è stata sciolta."
   no-permission: "&cNon hai il permesso per eseguire questo comando."
   already-in-gang: "&cSei già in una gang."
   not-in-gang: "&cNon sei in una gang."
@@ -35,13 +30,14 @@ messages:
   player-already-in-gang: "&cQuesto giocatore è già in una gang."
   no-pending-invites: "&cNon hai inviti di gang in sospeso."
   invite-expired: "&cL'invito è scaduto."
+  no-gangs: "&cNon sei in una gang."
   gang-name-taken: "&cEsiste già una gang con questo nome."
   gang-name-invalid: "&cNome della gang non valido. I nomi devono essere lunghi tra %min% e %max% caratteri e contenere solo lettere e numeri."
   gang-info-header: "&6===== &eInformazioni sulla Gang: &6%gangName% &6====="
   gang-info-owner: "&eProprietario: &f%owner%"
   gang-info-members: "&eMembri: &f%members%"
   gang-info-footer: "&6==========================================="
-  gang-list-header: "&6===== &eLista delle Gangs &6====="
+  gang-list-header: "&6===== &eLista delle Gang &6====="
   gang-list-entry: "&e%gangName% &7- &fProprietario: %owner%, Membri: %memberCount%"
   gang-list-footer: "&6==========================================="
   help-header: "&6===== &eGuida AZGangs &6===== by Analisi"
