@@ -12,8 +12,8 @@ gang-settings:
 # Messaggi
 messages:
   prefix: "&8[&6AZGangs&8] "
-  gang-created: "&aLa tua gang &6%gangName% &aè stata creata con successo!"
-  gang-disbanded: "&cLa gang &6%gangName% &cè stata sciolta."
+  gang-created: "&aLa tua gang &6%gangName% &a e' stata creata con successo!"
+  gang-disbanded: "&cLa gang &6%gangName% &c e' stata sciolta."
   gang-renamed: "&aLa tua gang è stata rinominata in &6%newName%&a."
   invite-sent: "&aHai inviato un invito alla gang a &6%playerName%&a."
   invite-received: "&aSei stato invitato a unirti alla gang &6%gangName%&a. Usa /gang join per accettare."
