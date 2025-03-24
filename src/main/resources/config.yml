@@ -1,4 +1,13 @@
 ################################### by Analisi #################################################
+database:
+  type: "sqlite" # mysql o sqlite
+  host: "localhost"
+  port: 3306
+  database: "azgangs"
+  username: "root"
+  password: "azplugins"
+  table-prefix: "azgangs_"
+
 gang-settings:
   max-members-per-gang: 10
   enable-pvp-between-members: false
