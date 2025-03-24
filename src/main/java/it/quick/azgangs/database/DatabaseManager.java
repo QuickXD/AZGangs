@@ -2,87 +2,98 @@ package it.quick.azgangs.database;
 
 import it.quick.azgangs.AZGangs;
 import it.quick.azgangs.models.Gang;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class DatabaseManager {
 
     private final AZGangs plugin;
-    private Connection connection;
+    private HikariDataSource dataSource;
     private final String tablePrefix;
     private final String gangsTable;
     private final String membersTable;
+    private final ExecutorService executorService;
 
     public DatabaseManager(AZGangs plugin) {
         this.plugin = plugin;
         this.tablePrefix = plugin.getConfigManager().getDatabasePrefix();
         this.gangsTable = tablePrefix + "gangs";
         this.membersTable = tablePrefix + "members";
+        this.executorService = Executors.newFixedThreadPool(4);
     }
 
     public void initialize() {
         try {
-            try {
-                Class.forName("org.sqlite.JDBC");
-            } catch (ClassNotFoundException e) {
-                plugin.getLogger().severe("SQLite JDBC driver non trovato: " + e.getMessage());
-                throw new SQLException("SQLite driver non trovato", e);
-            }
-
-            connectToDatabase();
+            setupHikariDataSource();
             createTables();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             plugin.getLogger().severe("Errore nell'inizializzazione del database: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    private void connectToDatabase() throws SQLException {
-        String type = plugin.getConfigManager().getDatabaseType();
+    private void setupHikariDataSource() {
+        HikariConfig config = new HikariConfig();
+        String type = plugin.getConfigManager().getDatabaseType().toLowerCase();
 
-        if (type.equalsIgnoreCase("mysql")) {
-            String host = plugin.getConfigManager().getDatabaseHost();
-            int port = plugin.getConfigManager().getDatabasePort();
-            String database = plugin.getConfigManager().getDatabaseName();
-            String username = plugin.getConfigManager().getDatabaseUsername();
-            String password = plugin.getConfigManager().getDatabasePassword();
-
-            String url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false";
-
-            try {
-                Class.forName("com.mysql.jdbc.Driver");
-            } catch (ClassNotFoundException e) {
-                plugin.getLogger().severe("Driver JDBC MySQL non trovato: " + e.getMessage());
-                throw new SQLException("Driver MySQL non trovato", e);
-            }
-
-            connection = DriverManager.getConnection(url, username, password);
-            plugin.getLogger().info("Connessione al database MySQL avvenuta con successo!");
-        } else if (type.equalsIgnoreCase("sqlite")) {
-            if (!plugin.getDataFolder().exists()) {
-                plugin.getDataFolder().mkdirs();
-            }
-            String url = "jdbc:sqlite:" + plugin.getDataFolder().getAbsolutePath() + "/azgangs.db";
-            connection = DriverManager.getConnection(url);
-            plugin.getLogger().info("Connessione al database SQLite avvenuta con successo!");
+        if (type.equals("mysql")) {
+            setupMySqlConfig(config);
         } else {
-            plugin.getLogger().severe("Tipo di database sconosciuto: " + type + ". Utilizzo SQLite come fallback.");
-            if (!plugin.getDataFolder().exists()) {
-                plugin.getDataFolder().mkdirs();
-            }
-            String url = "jdbc:sqlite:" + plugin.getDataFolder().getAbsolutePath() + "/azgangs.db";
-            connection = DriverManager.getConnection(url);
+            setupSqliteConfig(config);
         }
+
+        config.setMaximumPoolSize(20);
+        config.setMinimumIdle(10);
+        config.setIdleTimeout(30000);
+        config.setMaxLifetime(45000);
+        config.setConnectionTimeout(10000);
+        config.setPoolName("AZGangsConnectionPool");
+
+        if (!type.equals("mysql")) {
+            config.setConnectionTestQuery("SELECT 1");
+        }
+
+        config.addDataSourceProperty("cachePrepStmts", "true");
+        config.addDataSourceProperty("prepStmtCacheSize", "250");
+        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        config.addDataSourceProperty("useServerPrepStmts", "true");
+
+        dataSource = new HikariDataSource(config);
     }
 
-    private void createTables() throws SQLException {
-        if (connection == null) {
-            plugin.getLogger().severe("Errore nella creazioni delle tabelle");
-            return;
-        }
+    private void setupMySqlConfig(HikariConfig config) {
+        String host = plugin.getConfigManager().getDatabaseHost();
+        int port = plugin.getConfigManager().getDatabasePort();
+        String database = plugin.getConfigManager().getDatabaseName();
+        String username = plugin.getConfigManager().getDatabaseUsername();
+        String password = plugin.getConfigManager().getDatabasePassword();
 
-        try (Statement statement = connection.createStatement()) {
+        config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database +
+                "?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8");
+        config.setUsername(username);
+        config.setPassword(password);
+    }
+
+    private void setupSqliteConfig(HikariConfig config) {
+        if (!plugin.getDataFolder().exists()) {
+            plugin.getDataFolder().mkdirs();
+        }
+        String dbPath = plugin.getDataFolder().getAbsolutePath() + "/azgangs.db";
+        config.setDriverClassName("org.sqlite.JDBC");
+        config.setJdbcUrl("jdbc:sqlite:" + dbPath);
+    }
+
+    private void createTables() {
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + gangsTable + " (" +
                     "id INTEGER PRIMARY KEY " + (isMySql() ? "AUTO_INCREMENT" : "AUTOINCREMENT") + ", " +
                     "name VARCHAR(32) NOT NULL UNIQUE, " +
@@ -99,17 +110,24 @@ public class DatabaseManager {
                     ")");
 
             plugin.getLogger().info("Database tables created successfully!");
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Errore nella creazione delle tabelle: " + e.getMessage());
         }
     }
 
     public void closeConnection() {
+        if (dataSource != null) {
+            dataSource.close();
+            plugin.getLogger().info("Connessione al database chiusa.");
+        }
+
+        executorService.shutdown();
         try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-                plugin.getLogger().info("Connessione al database chiusa.");
+            if (!executorService.awaitTermination(800, TimeUnit.MILLISECONDS)) {
+                executorService.shutdownNow();
             }
-        } catch (SQLException e) {
-            plugin.getLogger().severe("Errore nella chiusura del database: " + e.getMessage());
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
         }
     }
 
@@ -118,9 +136,10 @@ public class DatabaseManager {
     }
 
     public boolean createGang(String name, UUID ownerUUID) {
-        try (PreparedStatement statement = connection.prepareStatement(
-                "INSERT INTO " + gangsTable + " (name, owner_uuid) VALUES (?, ?)",
-                Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "INSERT INTO " + gangsTable + " (name, owner_uuid) VALUES (?, ?)",
+                     Statement.RETURN_GENERATED_KEYS)) {
 
             statement.setString(1, name);
             statement.setString(2, ownerUUID.toString());
@@ -144,8 +163,9 @@ public class DatabaseManager {
     }
 
     public boolean disbandGang(int gangId) {
-        try (PreparedStatement statement = connection.prepareStatement(
-                "DELETE FROM " + gangsTable + " WHERE id = ?")) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "DELETE FROM " + gangsTable + " WHERE id = ?")) {
 
             statement.setInt(1, gangId);
 
@@ -158,8 +178,9 @@ public class DatabaseManager {
     }
 
     public boolean renameGang(int gangId, String newName) {
-        try (PreparedStatement statement = connection.prepareStatement(
-                "UPDATE " + gangsTable + " SET name = ? WHERE id = ?")) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "UPDATE " + gangsTable + " SET name = ? WHERE id = ?")) {
 
             statement.setString(1, newName);
             statement.setInt(2, gangId);
@@ -173,13 +194,9 @@ public class DatabaseManager {
     }
 
     public Gang getGangById(int gangId) {
-        if (connection == null) {
-            plugin.getLogger().severe("Errore nell'ottenimento della gang");
-            return null;
-        }
-
-        try (PreparedStatement statement = connection.prepareStatement(
-                "SELECT * FROM " + gangsTable + " WHERE id = ?")) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT * FROM " + gangsTable + " WHERE id = ?")) {
 
             statement.setInt(1, gangId);
 
@@ -196,13 +213,9 @@ public class DatabaseManager {
     }
 
     public Gang getGangByName(String name) {
-        if (connection == null) {
-            plugin.getLogger().severe("Impossibile recuperare i dati della gang.");
-            return null;
-        }
-
-        try (PreparedStatement statement = connection.prepareStatement(
-                "SELECT * FROM " + gangsTable + " WHERE LOWER(name) = LOWER(?)")) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT * FROM " + gangsTable + " WHERE LOWER(name) = LOWER(?)")) {
 
             statement.setString(1, name);
 
@@ -219,15 +232,11 @@ public class DatabaseManager {
     }
 
     public Gang getGangByPlayerUUID(UUID playerUUID) {
-        if (connection == null) {
-            plugin.getLogger().severe("Errore nell'ottenimento della gang");
-            return null;
-        }
-
-        try (PreparedStatement statement = connection.prepareStatement(
-                "SELECT g.* FROM " + gangsTable + " g " +
-                        "JOIN " + membersTable + " m ON g.id = m.gang_id " +
-                        "WHERE m.player_uuid = ?")) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT g.* FROM " + gangsTable + " g " +
+                             "JOIN " + membersTable + " m ON g.id = m.gang_id " +
+                             "WHERE m.player_uuid = ?")) {
 
             statement.setString(1, playerUUID.toString());
 
@@ -246,12 +255,8 @@ public class DatabaseManager {
     public List<Gang> getAllGangs() {
         List<Gang> gangs = new ArrayList<>();
 
-        if (connection == null) {
-            plugin.getLogger().severe("Errore nell'ottenere la gang.");
-            return gangs;
-        }
-
-        try (Statement statement = connection.createStatement();
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT * FROM " + gangsTable)) {
 
             while (resultSet.next()) {
@@ -278,13 +283,11 @@ public class DatabaseManager {
     }
 
     public boolean addMember(int gangId, UUID playerUUID) {
-        if (connection == null) {
-            plugin.getLogger().severe("Errore: database is null");
-            return false;
-        }
+        removeMember(playerUUID);
 
-        try (PreparedStatement statement = connection.prepareStatement(
-                "INSERT INTO " + membersTable + " (gang_id, player_uuid) VALUES (?, ?)")) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "INSERT INTO " + membersTable + " (gang_id, player_uuid) VALUES (?, ?)")) {
 
             statement.setInt(1, gangId);
             statement.setString(2, playerUUID.toString());
@@ -298,13 +301,9 @@ public class DatabaseManager {
     }
 
     public boolean removeMember(UUID playerUUID) {
-        if (connection == null) {
-            plugin.getLogger().severe("Impossibile rimuovere utenti dalla gang: database null");
-            return false;
-        }
-
-        try (PreparedStatement statement = connection.prepareStatement(
-                "DELETE FROM " + membersTable + " WHERE player_uuid = ?")) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "DELETE FROM " + membersTable + " WHERE player_uuid = ?")) {
 
             statement.setString(1, playerUUID.toString());
 
@@ -319,13 +318,9 @@ public class DatabaseManager {
     public List<UUID> getGangMembers(int gangId) {
         List<UUID> members = new ArrayList<>();
 
-        if (connection == null) {
-            plugin.getLogger().severe("Errore nell'ottenere i players");
-            return members;
-        }
-
-        try (PreparedStatement statement = connection.prepareStatement(
-                "SELECT player_uuid FROM " + membersTable + " WHERE gang_id = ?")) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT player_uuid FROM " + membersTable + " WHERE gang_id = ?")) {
 
             statement.setInt(1, gangId);
 
@@ -342,13 +337,9 @@ public class DatabaseManager {
     }
 
     public int getGangMemberCount(int gangId) {
-        if (connection == null) {
-            plugin.getLogger().severe("Impossibile trovare il numero dei membri.");
-            return 0;
-        }
-
-        try (PreparedStatement statement = connection.prepareStatement(
-                "SELECT COUNT(*) FROM " + membersTable + " WHERE gang_id = ?")) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT COUNT(*) FROM " + membersTable + " WHERE gang_id = ?")) {
 
             statement.setInt(1, gangId);
 
@@ -365,13 +356,9 @@ public class DatabaseManager {
     }
 
     public boolean isPlayerInGang(UUID playerUUID) {
-        if (connection == null) {
-            plugin.getLogger().severe("Errore!");
-            return false;
-        }
-
-        try (PreparedStatement statement = connection.prepareStatement(
-                "SELECT COUNT(*) FROM " + membersTable + " WHERE player_uuid = ?")) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT COUNT(*) FROM " + membersTable + " WHERE player_uuid = ?")) {
 
             statement.setString(1, playerUUID.toString());
 
