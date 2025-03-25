@@ -1,0 +1,25 @@
+package it.quick.azgangs.listeners;
+
+import it.quick.azgangs.AZGangs;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.entity.Player;
+
+public class GangChatListener implements Listener {
+    private final AZGangs plugin;
+
+    public GangChatListener(AZGangs plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void onPlayerChat(AsyncPlayerChatEvent event) {
+        Player player = event.getPlayer();
+        String message = event.getMessage();
+
+        if (plugin.getGangCommand().handleGangChatMessage(player, message)) {
+            event.setCancelled(true);
+        }
+    }
+}
