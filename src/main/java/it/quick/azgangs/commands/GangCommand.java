@@ -11,15 +11,18 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class GangCommand implements CommandExecutor, TabCompleter {
 
     private final AZGangs plugin;
+    private final Set<UUID> gangChatToggle = new HashSet<>();
     private final List<String> subCommands = Arrays.asList(
-            "create", "disband", "rename", "invite", "join", "leave", "info", "list", "help"
+            "create", "disband", "rename", "invite", "join", "leave", "info", "list", "help", "chat"
     );
 
     public GangCommand(AZGangs plugin) {
@@ -63,6 +66,9 @@ public class GangCommand implements CommandExecutor, TabCompleter {
                 break;
             case "info":
                 handleInfo(player, args);
+                break;
+            case "chat":
+                handleGangChat(player);
                 break;
             case "list":
                 handleList(player);
@@ -144,6 +150,49 @@ public class GangCommand implements CommandExecutor, TabCompleter {
         plugin.getInviteManager().sendInvite(player, target);
     }
 
+    private void handleGangChat(Player player) {
+        UUID playerUUID = player.getUniqueId();
+
+        if (!plugin.getGangManager().isPlayerInGang(playerUUID)) {
+            player.sendMessage(plugin.getConfigManager().getMessage("not-in-gang"));
+            return;
+        }
+
+        if (gangChatToggle.contains(playerUUID)) {
+            gangChatToggle.remove(playerUUID);
+            player.sendMessage(plugin.getConfigManager().getMessage("gang-chat-disabled"));
+        } else {
+            gangChatToggle.add(playerUUID);
+            player.sendMessage(plugin.getConfigManager().getMessage("gang-chat-enabled"));
+        }
+    }
+
+    public boolean handleGangChatMessage(Player player, String message) {
+        UUID playerUUID = player.getUniqueId();
+
+        if (!gangChatToggle.contains(playerUUID)) {
+            return false;
+        }
+
+        Gang playerGang = plugin.getGangManager().getPlayerGang(playerUUID);
+
+        if (playerGang == null) {
+            gangChatToggle.remove(playerUUID);
+            return false;
+        }
+
+        for (UUID memberUUID : playerGang.getMembers()) {
+            Player member = Bukkit.getPlayer(memberUUID);
+            if (member != null && member.isOnline()) {
+                member.sendMessage(plugin.getConfigManager().getMessage("gang-chat-format")
+                        .replace("%playerName%", player.getName())
+                        .replace("%message%", message));
+            }
+        }
+
+        return true;
+    }
+
     private void handleJoin(Player player) {
         if (!player.hasPermission(plugin.getConfigManager().getPermission("join"))) {
             player.sendMessage(plugin.getConfigManager().getMessage("no-permission"));
@@ -151,6 +200,10 @@ public class GangCommand implements CommandExecutor, TabCompleter {
         }
 
         plugin.getInviteManager().acceptInvite(player);
+    }
+
+    public boolean isGangChatEnabled(UUID playerUUID) {
+        return gangChatToggle.contains(playerUUID);
     }
 
     private void handleLeave(Player player) {

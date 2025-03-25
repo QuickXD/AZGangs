@@ -73,6 +73,9 @@ public class ConfigManager {
         return ChatColor.translateAlternateColorCodes('&', config.getString("help." + command, "&cHelp not found: " + command));
     }
 
+    public String getGangChatFormat() {
+        return config.getString("messages.gang-chat-format", "&8[&eGang Chat&8] &7%playerName%&f: %message%");
+    }
     public String getPermission(String permission) {
         return config.getString("permissions." + permission, "azgangs." + permission);
     }

@@ -3,6 +3,7 @@ package it.quick.azgangs;
 import it.quick.azgangs.commands.GangCommand;
 import it.quick.azgangs.database.DatabaseManager;
 import it.quick.azgangs.listeners.DamageListener;
+import it.quick.azgangs.listeners.GangChatListener;
 import it.quick.azgangs.managers.GangManager;
 import it.quick.azgangs.managers.InviteManager;
 import it.quick.azgangs.placeholder.GangPlaceholder;
@@ -13,6 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 public class AZGangs extends JavaPlugin {
 
@@ -21,6 +23,7 @@ public class AZGangs extends JavaPlugin {
     private DatabaseManager databaseManager;
     private GangManager gangManager;
     private InviteManager inviteManager;
+    private GangCommand gangCommand;
 
     private final Set<Player> disabledMessages = new HashSet<>();
 
@@ -37,9 +40,11 @@ public class AZGangs extends JavaPlugin {
         gangManager = new GangManager(this);
         inviteManager = new InviteManager(this);
 
-        getCommand("gang").setExecutor(new GangCommand(this));
+        gangCommand = new GangCommand(this);
+        getCommand("gang").setExecutor(gangCommand);
 
         getServer().getPluginManager().registerEvents(new DamageListener(this), this);
+        getServer().getPluginManager().registerEvents(new GangChatListener(this), this);
 
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new GangPlaceholder(this).register();
@@ -62,7 +67,6 @@ public class AZGangs extends JavaPlugin {
     }
 
     private void startAnnouncementTask() {
-
         Bukkit.getScheduler().runTaskLater(this, () -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (!disabledMessages.contains(player)) {
@@ -72,7 +76,6 @@ public class AZGangs extends JavaPlugin {
             }
         }, 2400L);
     }
-
 
     public void disableGangMessage(Player player) {
         disabledMessages.add(player);
@@ -96,5 +99,9 @@ public class AZGangs extends JavaPlugin {
 
     public InviteManager getInviteManager() {
         return inviteManager;
+    }
+
+    public GangCommand getGangCommand() {
+        return gangCommand;
     }
 }
